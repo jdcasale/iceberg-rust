@@ -290,11 +290,11 @@ impl RestCatalog {
         self.ctx
             .get_or_try_init(|| async {
                 let client = HttpClient::new(&self.user_config)?;
-                let catalog_config = RestCatalog::load_config(&client, &self.user_config).await?;
-                let config = self.user_config.clone().merge_with_config(catalog_config);
-                let client = client.update_with(&config)?;
+                // let catalog_config = RestCatalog::load_config(&client, &self.user_config).await?;
+                // let config = self.user_config.clone().merge_with_config(catalog_config);
+                // let client = client.update_with(&config)?;
 
-                Ok(RestContext { config, client })
+                Ok(RestContext { config: self.user_config.clone(), client })
             })
             .await
     }
