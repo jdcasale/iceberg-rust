@@ -3529,6 +3529,7 @@ dependencies = [
  "parquet",
  "pretty_assertions",
  "rand 0.8.5",
+ "regex",
  "reqwest",
  "reqwest-middleware",
  "roaring",
@@ -3604,21 +3605,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "iceberg-catalog-memory"
-version = "0.5.1"
-dependencies = [
- "async-trait",
- "futures",
- "iceberg",
- "itertools 0.13.0",
- "regex",
- "serde_json",
- "tempfile",
- "tokio",
- "uuid",
-]
-
-[[package]]
 name = "iceberg-catalog-rest"
 version = "0.5.1"
 dependencies = [
@@ -3691,7 +3677,6 @@ dependencies = [
  "expect-test",
  "futures",
  "iceberg",
- "iceberg-catalog-memory",
  "parquet",
  "tempfile",
  "tokio",
