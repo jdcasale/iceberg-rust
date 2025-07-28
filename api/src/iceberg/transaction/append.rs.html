@@ -103,14 +103,14 @@
 <a href=#103 id=103 data-nosnippet>103</a>        }
 <a href=#104 id=104 data-nosnippet>104</a>
 <a href=#105 id=105 data-nosnippet>105</a>        snapshot_producer
-<a href=#106 id=106 data-nosnippet>106</a>            .commit(FastAppendOperation, DefaultManifestProcess)
+<a href=#106 id=106 data-nosnippet>106</a>            .commit(AppendOperation, DefaultManifestProcess)
 <a href=#107 id=107 data-nosnippet>107</a>            .<span class="kw">await
 <a href=#108 id=108 data-nosnippet>108</a>    </span>}
 <a href=#109 id=109 data-nosnippet>109</a>}
 <a href=#110 id=110 data-nosnippet>110</a>
-<a href=#111 id=111 data-nosnippet>111</a><span class="kw">struct </span>FastAppendOperation;
+<a href=#111 id=111 data-nosnippet>111</a><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>AppendOperation;
 <a href=#112 id=112 data-nosnippet>112</a>
-<a href=#113 id=113 data-nosnippet>113</a><span class="kw">impl </span>SnapshotProduceOperation <span class="kw">for </span>FastAppendOperation {
+<a href=#113 id=113 data-nosnippet>113</a><span class="kw">impl </span>SnapshotProduceOperation <span class="kw">for </span>AppendOperation {
 <a href=#114 id=114 data-nosnippet>114</a>    <span class="kw">fn </span>operation(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Operation {
 <a href=#115 id=115 data-nosnippet>115</a>        Operation::Append
 <a href=#116 id=116 data-nosnippet>116</a>    }
