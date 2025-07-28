@@ -308,11 +308,6 @@ impl<'a> SnapshotProducer<'a> {
             manifest_files.push(added_manifest);
         }
 
-        // # TODO
-        // Support process delete entries.
-
-        let mut manifest_files = vec![added_manifest];
-        manifest_files.extend(existing_manifests);
         manifest_process
             .process_manifests(self, manifest_files)
             .await
