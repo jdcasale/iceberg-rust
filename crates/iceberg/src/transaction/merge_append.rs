@@ -107,9 +107,9 @@ impl MergeAppendAction {
 
     /// Add data files to the snapshot.
     pub fn add_data_files(
-        &mut self,
+        mut self,
         data_files: impl IntoIterator<Item = DataFile>,
-    ) -> Result<&mut Self> {
+    ) -> Result<Self> {
         self.added_data_files.extend(data_files);
         Ok(self)
     }
