@@ -107,9 +107,9 @@
 <a href=#107 id=107 data-nosnippet>107</a>
 <a href=#108 id=108 data-nosnippet>108</a>    <span class="doccomment">/// Add data files to the snapshot.
 <a href=#109 id=109 data-nosnippet>109</a>    </span><span class="kw">pub fn </span>add_data_files(
-<a href=#110 id=110 data-nosnippet>110</a>        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+<a href=#110 id=110 data-nosnippet>110</a>        <span class="kw-2">mut </span><span class="self">self</span>,
 <a href=#111 id=111 data-nosnippet>111</a>        data_files: <span class="kw">impl </span>IntoIterator&lt;Item = DataFile&gt;,
-<a href=#112 id=112 data-nosnippet>112</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="kw-2">&amp;mut </span><span class="self">Self</span>&gt; {
+<a href=#112 id=112 data-nosnippet>112</a>    ) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>&gt; {
 <a href=#113 id=113 data-nosnippet>113</a>        <span class="self">self</span>.added_data_files.extend(data_files);
 <a href=#114 id=114 data-nosnippet>114</a>        <span class="prelude-val">Ok</span>(<span class="self">self</span>)
 <a href=#115 id=115 data-nosnippet>115</a>    }
