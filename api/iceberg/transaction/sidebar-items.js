@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"constant":["MANIFEST_MERGE_ENABLED","MANIFEST_MIN_MERGE_COUNT","MANIFEST_TARGET_SIZE_BYTES"],"struct":["ActionCommit","Transaction"],"trait":["ApplyTransactionAction"]};
+window.SIDEBAR_ITEMS = {"struct":["ActionCommit","Transaction"],"trait":["ApplyTransactionAction"]};
