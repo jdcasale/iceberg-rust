@@ -19,6 +19,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use tokio::time::Instant;
 use uuid::Uuid;
 
 use crate::error::Result;
@@ -84,6 +85,10 @@ impl FastAppendAction {
 #[async_trait]
 impl TransactionAction for FastAppendAction {
     async fn commit(self: Arc<Self>, table: &Table) -> Result<ActionCommit> {
+        let trace_id = Uuid::new_v4().to_string();
+        let start = Instant::now();
+        tracing::info!("trace: {trace_id}, starting fastAppendAction");
+
         let snapshot_producer = SnapshotProducer::new(
             table,
             self.commit_uuid.unwrap_or_else(Uuid::now_v7),
@@ -91,20 +96,22 @@ impl TransactionAction for FastAppendAction {
             self.snapshot_properties.clone(),
             self.added_data_files.clone(),
         );
-
+        tracing::info!("trace: {trace_id}, executing fastAppendAction: snapshot_producer created, elapsed: {}ms", start.elapsed().as_millis());
         // validate added files
         snapshot_producer.validate_added_data_files(&self.added_data_files)?;
-
+        tracing::info!("trace: {trace_id}, executing fastAppendAction: validated added files, elapsed: {}ms", start.elapsed().as_millis());
         // Checks duplicate files
         if self.check_duplicate {
             snapshot_producer
                 .validate_duplicate_files(&self.added_data_files)
                 .await?;
         }
-
-        snapshot_producer
+        tracing::info!("trace: {trace_id}, executing fastAppendAction: duplicates checked, elapsed: {}ms", start.elapsed().as_millis());
+        let result = snapshot_producer
             .commit(AppendOperation, DefaultManifestProcess)
-            .await
+            .await;
+        tracing::info!("trace: {trace_id}, executing fastAppendAction: commit created, elapsed: {}ms", start.elapsed().as_millis());
+        result
     }
 }
 

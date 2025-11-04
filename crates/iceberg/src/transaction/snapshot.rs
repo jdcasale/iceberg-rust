@@ -18,7 +18,7 @@
 use std::collections::{HashMap, HashSet};
 use std::future::Future;
 use std::ops::RangeFrom;
-
+use tokio::time::Instant;
 use uuid::Uuid;
 
 use crate::error::Result;
@@ -382,15 +382,19 @@ impl<'a> SnapshotProducer<'a> {
         snapshot_produce_operation: OP,
         process: MP,
     ) -> Result<ActionCommit> {
+        let trace_id = Uuid::new_v4().to_string();
+        let start = Instant::now();
+        tracing::info!("trace: {trace_id}, starting commit");
         let new_manifests = self
             .manifest_file(&snapshot_produce_operation, &process)
             .await?;
+        tracing::info!("trace: {trace_id}, executing commit: manifest files, elapsed: {}ms", start.elapsed().as_millis());
         let next_seq_num = self.table.metadata().next_sequence_number();
 
         let summary = self.summary(&snapshot_produce_operation).map_err(|err| {
             Error::new(ErrorKind::Unexpected, "Failed to create snapshot summary.").with_source(err)
         })?;
-
+        tracing::info!("trace: {trace_id}, executing commit: summary, elapsed: {}ms", start.elapsed().as_millis());
         let manifest_list_path = self.generate_manifest_list_file_path(0);
 
         let mut manifest_list_writer = match self.table.metadata().format_version() {
@@ -410,9 +414,10 @@ impl<'a> SnapshotProducer<'a> {
                 next_seq_num,
             ),
         };
+        tracing::info!("trace: {trace_id}, executing commit: manifest writer created, elapsed: {}ms", start.elapsed().as_millis());
         manifest_list_writer.add_manifests(new_manifests.into_iter())?;
         manifest_list_writer.close().await?;
-
+        tracing::info!("trace: {trace_id}, executing commit: manifests added, elapsed: {}ms", start.elapsed().as_millis());
         let commit_ts = chrono::Utc::now().timestamp_millis();
         let new_snapshot = Snapshot::builder()
             .with_manifest_list(manifest_list_path)
@@ -423,7 +428,7 @@ impl<'a> SnapshotProducer<'a> {
             .with_schema_id(self.table.metadata().current_schema_id())
             .with_timestamp_ms(commit_ts)
             .build();
-
+        tracing::info!("trace: {trace_id}, executing commit: snapshot built, elapsed: {}ms", start.elapsed().as_millis());
         let updates = vec![
             TableUpdate::AddSnapshot {
                 snapshot: new_snapshot,
@@ -446,7 +451,7 @@ impl<'a> SnapshotProducer<'a> {
                 snapshot_id: self.table.metadata().current_snapshot_id(),
             },
         ];
-
+        tracing::info!("trace: {trace_id}, executing commit: done, elapsed: {}ms", start.elapsed().as_millis());
         Ok(ActionCommit::new(updates, requirements))
     }
 }
