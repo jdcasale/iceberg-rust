@@ -118,9 +118,9 @@ impl Transaction {
             metadata_builder = update.clone().apply(metadata_builder)?;
             tracing::info!("trace: {trace_id}, update applied: {}, elapsed: {}ms", update.type_name(), start.elapsed().as_millis());
         }
-        tracing::info!("trace: {trace_id}, start -- building metadata: {}, elapsed: {}ms", start.elapsed().as_millis());
+        tracing::info!("trace: {trace_id}, start -- building metadata, elapsed: {}ms", start.elapsed().as_millis());
         let build_metadata = metadata_builder.build()?;
-        tracing::info!("trace: {trace_id}, end -- building metadata: {}, elapsed: {}ms", start.elapsed().as_millis());
+        tracing::info!("trace: {trace_id}, end -- building metadata, elapsed: {}ms", start.elapsed().as_millis());
         Ok(table.with_metadata(Arc::new(build_metadata.metadata)))
     }
 
