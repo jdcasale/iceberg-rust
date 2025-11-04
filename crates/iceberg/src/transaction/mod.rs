@@ -66,7 +66,7 @@ mod upgrade_format_version;
 
 use std::sync::Arc;
 use std::time::Duration;
-
+use as_any::AsAny;
 use backon::{BackoffBuilder, ExponentialBackoff, ExponentialBuilder, RetryableWithContext};
 use tokio::time::Instant;
 use uuid::Uuid;
@@ -108,12 +108,20 @@ impl Transaction {
     }
 
     fn update_table_metadata(table: Table, updates: &[TableUpdate]) -> Result<Table> {
+        let trace_id = Uuid::new_v4().to_string();
+        let start = Instant::now();
+        tracing::info!("trace: {trace_id}, Starting update_table_metadata");
+
         let mut metadata_builder = table.metadata().clone().into_builder(None);
         for update in updates {
+            tracing::info!("trace: {trace_id}, applying update: {}, elapsed: {}ms", update.type_name(),  start.elapsed().as_millis());
             metadata_builder = update.clone().apply(metadata_builder)?;
+            tracing::info!("trace: {trace_id}, update applied: {}, elapsed: {}ms", update.type_name(), start.elapsed().as_millis());
         }
-
-        Ok(table.with_metadata(Arc::new(metadata_builder.build()?.metadata)))
+        tracing::info!("trace: {trace_id}, start -- building metadata: {}, elapsed: {}ms", start.elapsed().as_millis());
+        let build_metadata = metadata_builder.build()?;
+        tracing::info!("trace: {trace_id}, end -- building metadata: {}, elapsed: {}ms", start.elapsed().as_millis());
+        Ok(table.with_metadata(Arc::new(build_metadata.metadata)))
     }
 
     /// Applies an [`ActionCommit`] to the given [`Table`], returning a new [`Table`] with updated metadata.
