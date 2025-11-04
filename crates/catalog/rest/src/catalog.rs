@@ -34,8 +34,9 @@ use reqwest::header::{
 };
 use reqwest::{Client, Method, StatusCode, Url};
 use tokio::sync::OnceCell;
+use tokio::time::Instant;
 use typed_builder::TypedBuilder;
-
+use uuid::Uuid;
 use crate::client::{
     HttpClient, deserialize_catalog_response, deserialize_unexpected_catalog_error,
 };
@@ -765,6 +766,9 @@ impl Catalog for RestCatalog {
     }
 
     async fn update_table(&self, mut commit: TableCommit) -> Result<Table> {
+        let trace_id = Uuid::new_v4().to_string();
+        let start = Instant::now();
+        tracing::info!("trace: {trace_id}, Starting commit RPC");
         let context = self.context().await?;
 
         let request = context
@@ -817,11 +821,11 @@ impl Catalog for RestCatalog {
             }
             _ => return Err(deserialize_unexpected_catalog_error(http_response).await),
         };
-
+        tracing::info!("trace: {trace_id}, commit RPC complete, elapsed: {}ms", start.elapsed().as_millis());
         let file_io = self
             .load_file_io(Some(&response.metadata_location), None)
             .await?;
-
+        tracing::info!("trace: {trace_id}, commit file_io built, elapsed: {}ms", start.elapsed().as_millis());
         Table::builder()
             .identifier(commit.identifier().clone())
             .file_io(file_io)

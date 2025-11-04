@@ -68,7 +68,8 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use backon::{BackoffBuilder, ExponentialBackoff, ExponentialBuilder, RetryableWithContext};
-
+use tokio::time::Instant;
+use uuid::Uuid;
 use crate::error::Result;
 use crate::spec::{
     PROPERTY_COMMIT_MAX_RETRY_WAIT_MS, PROPERTY_COMMIT_MAX_RETRY_WAIT_MS_DEFAULT,
@@ -247,8 +248,11 @@ impl Transaction {
     }
 
     async fn do_commit(&mut self, catalog: &dyn Catalog) -> Result<Table> {
+        let trace_id = Uuid::new_v4().to_string();
+        let start = Instant::now();
+        tracing::info!("trace: {trace_id}, Starting commit");
         let refreshed = catalog.load_table(self.table.identifier()).await?;
-
+        tracing::info!("trace: {trace_id}, loaded table, elapsed: {}ms", start.elapsed().as_millis());
         if self.table.metadata() != refreshed.metadata()
             || self.table.metadata_location() != refreshed.metadata_location()
         {
@@ -261,6 +265,7 @@ impl Transaction {
         let mut existing_requirements: Vec<TableRequirement> = vec![];
 
         for action in &self.actions {
+            tracing::info!("trace: {trace_id}, executing action: {}, elapsed: {}ms", action.type_name(), start.elapsed().as_millis());
             let action_commit = Arc::clone(action).commit(&current_table).await?;
             // apply action commit to current_table
             current_table = Self::apply(
@@ -269,6 +274,7 @@ impl Transaction {
                 &mut existing_updates,
                 &mut existing_requirements,
             )?;
+            tracing::info!("trace: {trace_id}, executed action: {}, elapsed: {}ms", action.type_name(), start.elapsed().as_millis());
         }
 
         let table_commit = TableCommit::builder()
@@ -276,7 +282,7 @@ impl Transaction {
             .updates(existing_updates)
             .requirements(existing_requirements)
             .build();
-
+        tracing::info!("trace: {trace_id}, RPC update_table, elapsed: {}ms", start.elapsed().as_millis());
         catalog.update_table(table_commit).await
     }
 }

@@ -92,6 +92,7 @@ typed-builder = { workspace = true }
 url = { workspace = true }
 uuid = { workspace = true }
 zstd = { workspace = true }
+tracing = "0.1.41"
 
 [dev-dependencies]
 ctor = { workspace = true }
